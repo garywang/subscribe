@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Mail Forwarding</title>
+    <title>Subscribe</title>
 
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link href="css/custom.css" rel="stylesheet">
@@ -15,7 +15,7 @@
       <div class="row">
         <div class="col-md-6 col-md-offset-3">
           <div class="page-header">
-            <h1>Mail Forwarding</h1>
+            <h1>Subscribe</h1>
             <!-- Image Credit: http://www.iconspedia.com/icon/airmail-circle-icon-42962.html -->
           </div>
 
@@ -30,60 +30,33 @@
             <strong class="error-title"></strong> <span class="error-text"></span>
           </div>
 
-          <form class="well hidden" id="landing">
-            <p>
-              This web application allows you to re-route messages destined for your <strong>@mit.edu</strong>
-              email address, for example by forwarding copies to another inbox.
-            </p>
-
-            <a id="login" href="#" class="btn btn-primary">Achtung! This text set in app.js.</a>
-          </form>
-
-          <div id="app" class="hidden">
+          <div id="app">
             <div class="panel panel-default">
               <div class="panel-body">
                 <img id="loader" class="hidden" src="img/ajax-loader.gif" alt="loading" />
-                <p>Mail sent to <span class="email thisuser">unknown@mit.edu</span> will be delivered to:</p>
-                <p id="exchange">
-                  <a href="https://owa.exchange.mit.edu/owa/" target="_blank"><span class="glyphicon glyphicon-send"></span><span class="host">Exchange</span></a>
-                  <span class="email fwdaddr"></span>
-                  <span class="glyphicon glyphicon-remove-circle del"></span>
-                </p>
-                <p id="imap">
-                  <a href="https://webmail.mit.edu/" target="_blank"><span class="glyphicon glyphicon-send"></span><span class="host">IMAP</span></a>
-                  <span class="email fwdaddr"></span>
-                  <span class="glyphicon glyphicon-remove-circle del"></span>
-                </p>
-                <p id="smtp">
-                  <a id="smtp-link" href="" target="_blank"><span class="glyphicon glyphicon-send"></span><span class="host">External</span></a>
-                  <span class="email fwdaddr"></span>
-                  <span class="glyphicon glyphicon-remove-circle del"></span>
-                </p>
+                <p>Don't get enough emails?  Subscribe to one of these lists:</p>
 
-                <hr>
+                <div id="list" class="list-list-item hidden">
+                  <a class="webmoira-link" href="https://groups.mit.edu/webmoira/list/ec-discuss" target="_blank"><span class="glyphicon glyphicon-send"></span><span class="list-name">ec-discuss</span></a>
+                  <a href="#" class="btn btn-primary subscribe">Subscribe</a>
+                </div>
 
-                <p><a id="split-option" href="#" data-toggle="tooltip" title="click to change option">Instead</a>, forward mail to:</p>
-                <form id="update-form">
-                  <input type="email" id="new-address" class="email" placeholder="you@yourmail.com" />
-                  <button type="submit" class="btn btn-primary">Update</button>
-                </form>
+                <div id="randsub" class="hidden">
+                  <hr>
+
+                  <p>Or, subscribe to a random list:</p>
+                  <a id="random" href="#" class="btn btn-primary">I'm Feeling Lucky</a>
+                </div>
               </div>
             </div>
 
             <p class="text-muted">
-              Last modified <strong id="lastmod-time" class="timeago">some time ago</strong> by <strong id="lastmod-user">unknown</strong>.
-              <a id="restore-default" href="#">Restore Default Settings</a>.
+              Blatant ripoff of <a href="https://mailto.mit.edu/" target="_blank">mailto.mit.edu</a>
             </p>
           </div>
         </div>
       </div>
     </div>
-
-    <a href="https://sipb.mit.edu/" target="_blank">
-      <img id="author" src="img/fuzzball-mini.png" alt="*" data-toggle="tooltip"
-      data-placement="left" title="A project of SIPB. Questions? Contact
-      mailto@mit.edu." />
-    </a>
 
     <script src="js/jquery-1.11.0.min.js"></script>
     <script src="js/bootstrap.min.js"></script>

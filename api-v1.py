@@ -40,6 +40,7 @@
 import moira
 import os
 import re
+import zephyr
 
 from bottle import get, put, delete, abort, request
 from bottle_webathena import *
@@ -47,97 +48,45 @@ from datetime import datetime
 
 APP_ROOT = os.path.abspath(os.path.dirname(__file__))
 
-MN = "mailto" # this application's name, for Moira modwith
+MN = "subscribe" # this application's name, for Moira modwith
 
 
-@get("/<user>")
+@get("/public_lists")
+#@webathena
+@moira_unauth
+@json_api
+def get_public_lists():
+    lists = moira.query("qgli", "true", "true", "false", "true", "dontcare")
+    return [l['list'] for l in lists]
+
+@put("/list/<list_name>/<user>")
 @webathena
 @moira_auth(MN)
 @json_api
-def get_poboxes(user):
-    return pobox_status(user)
-
-@put("/<user>/reset")
-@webathena
-@moira_auth(MN)
-@json_api
-def reset(user):
-    moira.query("set_pobox_pop", user)
-    return pobox_status(user)
-
-@put("/<user>/<address>")
-@webathena
-@moira_auth(MN)
-@json_api
-def put_address(user, address):
-    mtype, box = type_and_box(address)
-    moira.query("set_pobox", user, mtype, box)
-    return pobox_status(user)
-
-@put("/<user>/<internal>/<external>")
-@webathena
-@moira_auth(MN)
-@json_api
-def put_split_addresses(user, internal, external):
-    internal_mtype, internal_box = type_and_box(internal)
-    if internal_mtype == "SMTP":
-        abort(400, "Internal address cannot be type SMTP.")
-    external_mtype, external_box = type_and_box(external)
-    if external_mtype != "SMTP":
-        abort(400, "External address must be type SMTP.")
-    moira.query("set_pobox", user, internal_mtype, internal_box)
-    moira.query("set_pobox", user, "SPLIT", external_box)
-    return pobox_status(user)
-
-
-def pobox_status(user):
-    # Run Moira Query
+def subscribe(list_name, user):
     try:
-        boxinfo = moira.query("get_pobox", user)[0]
+        zephyr._z.initialize()
+        zephyr._z.openPort()
+        zephyr.ZNotice(cls='subscribe-auto', instance='subscribe', message=list_name, auth=False, sender=user, opcode='AUTO').send()
+    except e:
+        pass
+    try:
+        moira.query("amtl", list_name, "USER", user)
+        return {"msg": "Subscribed to " + list_name + "@mit.edu",
+                "status": "success"}
     except moira.MoiraException as e:
-        if len(e.args) >= 2 and e[1].lower() == "no such user":
-            abort(404, e[1])
+        if len(e.args) >= 2 and e[1].lower() == "record already exists":
+            return {"msg": "Already subscribed to " + list_name + "@mit.edu",
+                    "status": "info"}
         raise e
 
-    # Search Moira
-    moira_addresses = boxinfo["address"].split(", ")
-    exchange = []
-    imap = []
-    external = []
-    for address in moira_addresses:
-        # Categorize as Exchange, IMAP or External
-        if re.search("@EXCHANGE.MIT.EDU$", address, re.IGNORECASE):
-            exchange.append(address)
-        elif re.search("@PO\d+.MIT.EDU$", address, re.IGNORECASE):
-            imap.append(address)
-        else:
-            external.append(address)
-
-    # Construct Response
-    boxes = []
-    for addresses, mtype in ((exchange, "EXCHANGE"), (imap, "IMAP"),
-        (external, "SMTP")):
-        for address in addresses:
-            boxes.append({"address": address,
-                          "type": mtype,
-                          "enabled": True})
-    isotime = datetime.strptime(boxinfo["modtime"], MOIRA_TIME_FORMAT) \
-        .isoformat()
-    return {"boxes": boxes,
-            "modtime": isotime,
-            "modwith": boxinfo["modwith"],
-            "modby": boxinfo["modby"]}
-
-def type_and_box(address):
-    """Return the type and box associated with an email address."""
-    if re.search("@EXCHANGE.MIT.EDU$", address, re.IGNORECASE):
-        return "EXCHANGE", "EXCHANGE.MIT.EDU"
-    elif re.search("@PO\d+.MIT.EDU$", address, re.IGNORECASE):
-        username = address.split("@")[0]
-        return "IMAP", "%s.po" % username
-    else:
-        return "SMTP", address
-
+@delete("/list/<list_name>/<user>")
+@webathena
+@moira_auth(MN)
+@json_api
+def unsubscribe(list_name, user):
+    moira.query("dmfl", list_name, "USER", user)
+    return ""
 
 if __name__ == "__main__":
     import bottle

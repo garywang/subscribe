@@ -49,9 +49,17 @@
   margin-right: 10px;
 }
 
-.host {
+.list-list-item {
+  margin: 15px 0px;
+}
+
+.host, .list-name {
   font-weight: bold;
   margin-right: 5px;
+}
+
+.subscribe {
+  float: right;
 }
 
 .del {

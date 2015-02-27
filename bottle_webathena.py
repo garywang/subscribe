@@ -51,6 +51,16 @@ def moira_auth(client_name):
         return wrapped
     return wrapper
 
+def moira_unauth(function):
+    """
+    A decorator that opens an unauthenticated Moira session before the wrapped
+    function is executed.
+    """
+    def wrapped(*args, **kwargs):
+        moira.connect()
+        return function(*args, **kwargs)
+    return wrapped
+
 def json_api(function):
     """
     A decorator that automatically JSON-encodes output.

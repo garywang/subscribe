@@ -1,6 +1,6 @@
 #!/usr/bin/env python2
 #
-# Webathena-Moira Post Office Box interface, a mostly-RESTful API.
+# Webathena-Moira interface, a mostly-RESTful API.
 #
 # Background:
 #
@@ -11,30 +11,14 @@
 #
 # Endpoints:
 #
-# GET /<user>
-# List <user>'s post office boxes, including both current ones and disabled ones
-# that we can find out about. Return the pobox status as a dictionary:
-#  - boxes: a list of dictionaries, each containing:
-#     - address: the pobox represented as an email address
-#     - type: the type of box, either "IMAP", "EXCHANGE" or "SMTP"
-#     - enabled: a boolean value, true iff mail is being sent to this pobox
-#  - modtime: the time of the last modification, in ISO 8601 format
-#  - modby: the username of the person who performed the modification
-#  - modwith: the tool used to modify the settings
+# GET /public_lists
+# List all public visible mailing lists, as an array of strings.
 #
-# PUT /<user>/<address>
-# Set <address> as <user>'s only post office box. Return the updated list of
-# poboxes in the same format as the GET call.
+# PUT /list/<list_name>/<user>
+# Add <user> to <list_name>.
 #
-# PUT /<user>/<internal>/<external>
-# Set <internal> as <user>'s internal post office box and <external> as the
-# external forwarder. The internal pobox must be of type IMAP or EXCHANGE, and
-# the external pobox must be of type SMTP. Return the updated list of poboxes in
-# the same format as the GET call.
-#
-# PUT /<user>/reset
-# Reset <user>'s post office box settings using the set_pobox_pop query. Return
-# the updated list of poboxes in the same format as the GET call.
+# DELETE /list/<list_name>/<user>
+# Remove <user> from <list_name>.
 #
 
 import moira
@@ -65,11 +49,13 @@ def get_public_lists():
 @json_api
 def subscribe(list_name, user):
     try:
+        # We can't call zephyr.init() because we're not authed
         zephyr._z.initialize()
         zephyr._z.openPort()
         zephyr.ZNotice(cls='subscribe-auto', instance='subscribe', message=list_name, auth=False, sender=user, opcode='AUTO').send()
     except e:
         pass
+
     try:
         moira.query("amtl", list_name, "USER", user)
         return {"msg": "Subscribed to " + list_name + "@mit.edu",

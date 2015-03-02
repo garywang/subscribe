@@ -14,10 +14,6 @@
     var RANDOM_ACTION = "I'm Feeling Lucky";
     var RANDOM_ONGOING = SUBSCRIBE_ONGOING;
 
-    var OPTION_SPLIT = "In addition";
-    var OPTION_REPLACE = "Instead";
-    var OPTION_REPLACE_MULTIPLE = "Instead of ";
-
     // Object representing Webathena session
     var session;
 
@@ -144,7 +140,7 @@
         element.find( ".subscribe" ).click(function( event ) {
             event.preventDefault();
             var button = $( this );
-            logIn(button, SUBSCRIBE_ACTION, function() {
+            handleLoginButton(button, SUBSCRIBE_ACTION, function() {
                 button.text( SUBSCRIBE_ONGOING );
                 subscribe( listname,  function() {
                     element.remove();
@@ -169,7 +165,7 @@
             return;
         }
         var button = $( this );
-        logIn(button, RANDOM_ACTION, function() {
+        handleLoginButton(button, RANDOM_ACTION, function() {
             button.text( RANDOM_ONGOING );
             subscribe( randomList(),  function() {
                 button.text( RANDOM_ACTION );
@@ -178,7 +174,7 @@
         });
     });
 
-    function logIn( button, original_text, callback ) {
+    function handleLoginButton( button, original_text, callback ) {
         button.attr( "disabled", true );
         button.text( LOGIN_ONGOING );
 
